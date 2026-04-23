@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getStory, deleteStory } from "../lib/stories";
+import { useAuth } from "../context/AuthContext";
 
 const CATEGORY_COLORS = {
   "Breaking News": "bg-red-100 text-red-700",
@@ -15,6 +16,7 @@ const CATEGORY_COLORS = {
 export default function StoryDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [story, setStory] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -88,11 +90,16 @@ export default function StoryDetail() {
         {story.content}
       </div>
 
-      <div className="mt-12 pt-6 border-t border-gray-100">
-        <button onClick={handleDelete} className="text-sm text-red-400 hover:text-red-600 transition-colors">
-          Delete story
-        </button>
-      </div>
+      {user && (
+        <div className="mt-12 pt-6 border-t border-gray-100">
+          <button
+            onClick={handleDelete}
+            className="text-sm text-red-400 hover:text-red-600 transition-colors"
+          >
+            Delete story
+          </button>
+        </div>
+      )}
     </article>
   );
 }

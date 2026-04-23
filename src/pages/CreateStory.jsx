@@ -1,19 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { createStory, uploadImage } from "../lib/stories";
-
-const CATEGORIES = [
-  "Breaking News",
-  "Sports",
-  "Arts & Culture",
-  "Academics",
-  "Opinion",
-  "Events",
-  "Community",
-];
+import { getCategories } from "../lib/categories";
 
 export default function CreateStory() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [categories, setCategories] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
@@ -25,6 +19,14 @@ export default function CreateStory() {
     image_url: "",
   });
 
+  useEffect(() => {
+    if (user === null) navigate("/login");
+  }, [user]);
+
+  useEffect(() => {
+    getCategories().then(setCategories);
+  }, []);
+
   const update = (field, value) => setForm((p) => ({ ...p, [field]: value }));
 
   const handleImageUpload = async (e) => {
@@ -35,7 +37,7 @@ export default function CreateStory() {
       const url = await uploadImage(file);
       update("image_url", url);
     } catch {
-      alert("Image upload failed. Check your Appwrite storage bucket settings.");
+      alert("Image upload failed.");
     } finally {
       setUploading(false);
     }
@@ -48,11 +50,12 @@ export default function CreateStory() {
       const story = await createStory(form);
       navigate(`/story/${story.$id}`);
     } catch (err) {
-      console.error(err);
       alert(err?.message || "Failed to publish.");
       setSubmitting(false);
     }
   };
+
+  if (user === undefined) return null;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
@@ -135,8 +138,8 @@ export default function CreateStory() {
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             >
               <option value="">Select category</option>
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
+              {categories.map((cat) => (
+                <option key={cat.$id} value={cat.name}>{cat.name}</option>
               ))}
             </select>
           </div>
