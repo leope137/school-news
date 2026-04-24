@@ -23,7 +23,7 @@ function Navbar() {
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
       <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
         <Link to="/" className="font-heading text-2xl font-black tracking-tight">
-          The School Press
+          School News Official (SNO)
         </Link>
         <div className="flex items-center gap-3">
           {user ? (
