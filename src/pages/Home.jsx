@@ -101,16 +101,21 @@ export default function Home() {
                     {story.summary}
                   </p>
                 )}
-                <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
-                  {story.author && <span>{story.author}</span>}
-                  {story.author && <span>·</span>}
-                  <span>
-                    {new Date(story.$createdAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
+                <div className="mt-3 flex items-center justify-between text-xs text-gray-400">
+                  <div className="flex items-center gap-2">
+                    {story.author && <span>{story.author}</span>}
+                    {story.author && <span>·</span>}
+                    <span>
+                      {new Date(story.$createdAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                  {(story.likes > 0 || story.dislikes > 0) && (
+                    <span className="text-green-600 font-medium">▲ {story.likes || 0}</span>
+                  )}
                 </div>
               </div>
             </article>

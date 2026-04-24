@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getStory, deleteStory } from "../lib/stories";
+import { getStory, deleteStory, getStoryVote, voteStory } from "../lib/stories";
 import { useAuth } from "../context/AuthContext";
 import Comments from "../components/Comments";
 
@@ -19,13 +19,38 @@ export default function StoryDetail() {
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
   const [story, setStory] = useState(null);
+  const [myVote, setMyVote] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getStory(id)
-      .then(setStory)
+      .then((s) => {
+        setStory(s);
+        if (user) getStoryVote(id, user.$id).then(setMyVote);
+      })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, user]);
+
+  const handleVote = async (type) => {
+    if (!user) return;
+    const prev = myVote;
+    // Optimistic update
+    setStory((s) => {
+      let { likes, dislikes } = s;
+      if (prev === type) {
+        if (type === "like") likes = Math.max(0, likes - 1);
+        else dislikes = Math.max(0, dislikes - 1);
+      } else {
+        if (prev === "like") likes = Math.max(0, likes - 1);
+        if (prev === "dislike") dislikes = Math.max(0, dislikes - 1);
+        if (type === "like") likes++;
+        else dislikes++;
+      }
+      return { ...s, likes, dislikes };
+    });
+    setMyVote(prev === type ? null : type);
+    await voteStory(id, user.$id, type);
+  };
 
   const handleDelete = async () => {
     if (!window.confirm("Delete this story?")) return;
@@ -75,6 +100,24 @@ export default function StoryDetail() {
             month: "long", day: "numeric", year: "numeric",
           })}
         </span>
+      </div>
+
+      <div className="flex items-center gap-3 mt-4">
+        <button
+          onClick={() => handleVote("like")}
+          disabled={!user}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors disabled:cursor-default ${myVote === "like" ? "bg-green-50 border-green-300 text-green-700" : "border-gray-200 text-gray-500 hover:border-green-300 hover:text-green-700"}`}
+        >
+          ▲ {story.likes || 0}
+        </button>
+        <button
+          onClick={() => handleVote("dislike")}
+          disabled={!user}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors disabled:cursor-default ${myVote === "dislike" ? "bg-red-50 border-red-300 text-red-500" : "border-gray-200 text-gray-500 hover:border-red-300 hover:text-red-500"}`}
+        >
+          ▼ {story.dislikes || 0}
+        </button>
+        {!user && <span className="text-xs text-gray-400"><a href="/login" className="underline">Sign in</a> to vote</span>}
       </div>
 
       {story.image_url && (
