@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getStory, deleteStory } from "../lib/stories";
 import { useAuth } from "../context/AuthContext";
+import Comments from "../components/Comments";
 
 const CATEGORY_COLORS = {
   "Breaking News": "bg-red-100 text-red-700",
@@ -16,7 +17,7 @@ const CATEGORY_COLORS = {
 export default function StoryDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [story, setStory] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -71,9 +72,7 @@ export default function StoryDetail() {
         {story.author && <span>·</span>}
         <span>
           {new Date(story.$createdAt).toLocaleDateString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
+            month: "long", day: "numeric", year: "numeric",
           })}
         </span>
       </div>
@@ -90,7 +89,7 @@ export default function StoryDetail() {
         {story.content}
       </div>
 
-      {user && (
+      {isAdmin && (
         <div className="mt-12 pt-6 border-t border-gray-100">
           <button
             onClick={handleDelete}
@@ -100,6 +99,8 @@ export default function StoryDetail() {
           </button>
         </div>
       )}
+
+      <Comments storyId={id} storyCreatorId={story.creator_id} />
     </article>
   );
 }

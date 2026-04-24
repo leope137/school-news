@@ -6,14 +6,16 @@ import CreateStory from "./pages/CreateStory";
 import StoryDetail from "./pages/StoryDetail";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
+import SetupProfile from "./pages/SetupProfile";
 
 function Navbar() {
-  const { user, setUser } = useAuth();
+  const { user, isAdmin, displayName, setUser, setProfile } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
     setUser(null);
+    setProfile(null);
     navigate("/");
   };
 
@@ -26,26 +28,24 @@ function Navbar() {
         <div className="flex items-center gap-3">
           {user ? (
             <>
-              <Link
-                to="/admin"
-                className="text-sm text-gray-500 hover:text-black transition-colors"
-              >
-                Categories
-              </Link>
-              <Link
-                to="/create"
-                className="bg-black text-white text-sm font-body px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                + Write Story
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="text-sm text-gray-400 hover:text-black transition-colors"
-              >
+              {displayName && <span className="text-sm text-gray-500 hidden sm:block">{displayName}</span>}
+              {isAdmin && (
+                <>
+                  <Link to="/admin" className="text-sm text-gray-500 hover:text-black transition-colors">Categories</Link>
+                  <Link to="/create" className="bg-black text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                    + Write Story
+                  </Link>
+                </>
+              )}
+              <button onClick={handleLogout} className="text-sm text-gray-400 hover:text-black transition-colors">
                 Logout
               </button>
             </>
-          ) : null}
+          ) : (
+            <Link to="/login" className="text-sm text-gray-500 hover:text-black transition-colors">
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
     </header>
@@ -63,6 +63,7 @@ export default function App() {
           <Route path="/story/:id" element={<StoryDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/setup-profile" element={<SetupProfile />} />
         </Routes>
       </div>
     </AuthProvider>
