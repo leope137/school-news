@@ -11,7 +11,7 @@ const CATEGORIES_FALLBACK = [
 
 export default function CreateStory() {
   const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
+  const { user, canWrite } = useAuth();
   const [categories, setCategories] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -21,7 +21,7 @@ export default function CreateStory() {
   });
 
   useEffect(() => {
-    if (user === null || (user !== undefined && !isAdmin)) navigate("/");
+    if (user === null || (user !== undefined && !canWrite)) navigate("/");
   }, [user, isAdmin]);
 
   useEffect(() => {

@@ -22,12 +22,14 @@ export function AuthProvider({ children }) {
   }, []);
 
   const isAdmin = user?.labels?.includes("admin") ?? false;
+  const isWriter = user?.labels?.includes("writer") ?? false;
+  const canWrite = isAdmin || isWriter;
   const displayName = profile
     ? [profile.first_name, profile.middle_name, profile.last_name].filter(Boolean).join(" ")
     : null;
 
   return (
-    <AuthContext.Provider value={{ user, setUser, profile, setProfile, isAdmin, displayName }}>
+    <AuthContext.Provider value={{ user, setUser, profile, setProfile, isAdmin, isWriter, canWrite, displayName }}>
       {children}
     </AuthContext.Provider>
   );
