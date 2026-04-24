@@ -1,4 +1,4 @@
-import { Routes, Route, Link, useNavigate } from "react-router-dom";
+import { Routes, Route, Link, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { logout } from "./lib/auth";
 import Home from "./pages/Home";
@@ -52,19 +52,31 @@ function Navbar() {
   );
 }
 
+function ProfileGuard({ children }) {
+  const { user, profile } = useAuth();
+  const location = useLocation();
+  const exempt = ["/setup-profile", "/login"];
+  if (user && profile === null && !exempt.includes(location.pathname)) {
+    return <Navigate to="/setup-profile" replace />;
+  }
+  return children;
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <div className="min-h-screen bg-gray-50 font-body">
         <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/create" element={<CreateStory />} />
-          <Route path="/story/:id" element={<StoryDetail />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/setup-profile" element={<SetupProfile />} />
-        </Routes>
+        <ProfileGuard>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/create" element={<CreateStory />} />
+            <Route path="/story/:id" element={<StoryDetail />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/setup-profile" element={<SetupProfile />} />
+          </Routes>
+        </ProfileGuard>
       </div>
     </AuthProvider>
   );
