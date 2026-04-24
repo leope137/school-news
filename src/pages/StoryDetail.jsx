@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { getStory, deleteStory, getStoryVote, voteStory } from "../lib/stories";
 import { useAuth } from "../context/AuthContext";
 import Comments from "../components/Comments";
@@ -34,7 +35,6 @@ export default function StoryDetail() {
   const handleVote = async (type) => {
     if (!user) return;
     const prev = myVote;
-    // Optimistic update
     setStory((s) => {
       let { likes, dislikes } = s;
       if (prev === type) {
@@ -58,92 +58,92 @@ export default function StoryDetail() {
     navigate("/");
   };
 
-  if (loading) return <div className="text-center py-24 text-gray-400">Loading...</div>;
+  if (loading) return (
+    <div className="flex items-center justify-center py-24">
+      <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
-  if (!story) {
-    return (
-      <div className="text-center py-24">
-        <p className="text-gray-400">Story not found.</p>
-        <button onClick={() => navigate("/")} className="mt-4 text-sm underline text-gray-500">
-          Go home
-        </button>
-      </div>
-    );
-  }
+  if (!story) return (
+    <div className="text-center py-24">
+      <p className="text-gray-400">Story not found.</p>
+      <button onClick={() => navigate("/")} className="mt-4 text-sm underline text-gray-500">Go home</button>
+    </div>
+  );
 
   return (
-    <article className="max-w-2xl mx-auto px-4 py-10">
-      <button
-        onClick={() => navigate("/")}
-        className="text-sm text-gray-400 hover:text-gray-700 mb-6 block transition-colors"
-      >
-        ← Back to stories
-      </button>
-
-      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[story.category] || "bg-gray-100 text-gray-600"}`}>
-        {story.category}
-      </span>
-
-      <h1 className="font-heading text-3xl sm:text-4xl font-bold mt-3 leading-tight">
-        {story.title}
-      </h1>
-
-      {story.summary && (
-        <p className="text-gray-500 text-lg mt-3">{story.summary}</p>
-      )}
-
-      <div className="flex items-center gap-2 text-sm text-gray-400 mt-4">
-        {story.author && <span>{story.author}</span>}
-        {story.author && <span>·</span>}
-        <span>
-          {new Date(story.$createdAt).toLocaleDateString("en-US", {
-            month: "long", day: "numeric", year: "numeric",
-          })}
-        </span>
-      </div>
-
-      <div className="flex items-center gap-3 mt-4">
-        <button
-          onClick={() => handleVote("like")}
-          disabled={!user}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors disabled:cursor-default ${myVote === "like" ? "bg-green-50 border-green-300 text-green-700" : "border-gray-200 text-gray-500 hover:border-green-300 hover:text-green-700"}`}
-        >
-          ▲ {story.likes || 0}
-        </button>
-        <button
-          onClick={() => handleVote("dislike")}
-          disabled={!user}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors disabled:cursor-default ${myVote === "dislike" ? "bg-red-50 border-red-300 text-red-500" : "border-gray-200 text-gray-500 hover:border-red-300 hover:text-red-500"}`}
-        >
-          ▼ {story.dislikes || 0}
-        </button>
-        {!user && <span className="text-xs text-gray-400"><a href="/login" className="underline">Sign in</a> to vote</span>}
-      </div>
-
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Hero image */}
       {story.image_url && (
-        <img
-          src={story.image_url}
-          alt={story.title}
-          className="w-full rounded-xl mt-6 aspect-video object-cover"
-        />
-      )}
-
-      <div className="mt-8 text-gray-800 leading-relaxed whitespace-pre-wrap">
-        {story.content}
-      </div>
-
-      {isAdmin && (
-        <div className="mt-12 pt-6 border-t border-gray-100">
-          <button
-            onClick={handleDelete}
-            className="text-sm text-red-400 hover:text-red-600 transition-colors"
-          >
-            Delete story
-          </button>
+        <div className="w-full aspect-video max-h-[500px] overflow-hidden">
+          <img src={story.image_url} alt={story.title} className="w-full h-full object-cover" />
         </div>
       )}
 
-      <Comments storyId={id} storyCreatorId={story.creator_id} />
-    </article>
+      <article className="max-w-2xl mx-auto px-4 py-10">
+        <button onClick={() => navigate("/")} className="text-sm text-gray-400 hover:text-black mb-6 block transition-colors flex items-center gap-1">
+          ← Back
+        </button>
+
+        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${CATEGORY_COLORS[story.category] || "bg-gray-100 text-gray-600"}`}>
+          {story.category}
+        </span>
+
+        <h1 className="font-heading text-3xl sm:text-5xl font-bold mt-4 leading-tight">
+          {story.title}
+        </h1>
+
+        {story.summary && (
+          <p className="text-gray-500 text-xl mt-3 leading-relaxed border-l-4 border-red-500 pl-4">
+            {story.summary}
+          </p>
+        )}
+
+        <div className="flex items-center gap-2 text-sm text-gray-400 mt-5">
+          {story.author && <span className="font-medium text-gray-700">{story.author}</span>}
+          {story.author && <span>·</span>}
+          <span>{new Date(story.$createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+        </div>
+
+        {/* Vote buttons */}
+        <div className="flex items-center gap-3 mt-4">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => handleVote("like")}
+            disabled={!user}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border-2 transition-all disabled:cursor-default ${myVote === "like" ? "bg-green-50 border-green-400 text-green-700" : "border-gray-200 text-gray-500 hover:border-green-400 hover:text-green-700"}`}
+          >
+            ▲ {story.likes || 0}
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => handleVote("dislike")}
+            disabled={!user}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border-2 transition-all disabled:cursor-default ${myVote === "dislike" ? "bg-red-50 border-red-400 text-red-600" : "border-gray-200 text-gray-500 hover:border-red-400 hover:text-red-600"}`}
+          >
+            ▼ {story.dislikes || 0}
+          </motion.button>
+          {!user && <span className="text-xs text-gray-400"><a href="/login" className="underline hover:text-black">Sign in</a> to vote</span>}
+        </div>
+
+        <div className="prose prose-lg max-w-none mt-10 text-gray-800 leading-relaxed whitespace-pre-wrap font-body">
+          {story.content}
+        </div>
+
+        {isAdmin && (
+          <div className="mt-12 pt-6 border-t border-gray-100">
+            <button onClick={handleDelete} className="text-sm text-red-400 hover:text-red-600 transition-colors">
+              Delete story
+            </button>
+          </div>
+        )}
+
+        <Comments storyId={id} storyCreatorId={story.creator_id} />
+      </article>
+    </motion.div>
   );
 }

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Routes, Route, Link, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { logout } from "./lib/auth";
@@ -7,10 +8,19 @@ import StoryDetail from "./pages/StoryDetail";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import SetupProfile from "./pages/SetupProfile";
+import Splash from "./components/Splash";
+import Logo from "./components/Logo";
 
 function Navbar() {
   const { user, isAdmin, canWrite, displayName, setUser, setProfile } = useAuth();
   const navigate = useNavigate();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -20,20 +30,31 @@ function Navbar() {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-      <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-        <Link to="/" className="font-heading text-2xl font-black tracking-tight">
-          School News Official (SNO)
+    <header className={`sticky top-0 z-40 transition-all duration-300 ${scrolled ? "glass border-b border-gray-200 shadow-sm" : "bg-white border-b border-gray-200"}`}>
+      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <Logo size={34} />
+          <div>
+            <span className="font-heading font-black text-lg tracking-tight leading-none block">SNO</span>
+            <span className="text-gray-400 text-[10px] font-body tracking-wider uppercase leading-none">School News Official</span>
+          </div>
         </Link>
+
         <div className="flex items-center gap-3">
           {user ? (
             <>
-              {displayName && <span className="text-sm text-gray-500 hidden sm:block">{displayName}</span>}
+              {displayName && (
+                <span className="hidden sm:block text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                  {displayName}
+                </span>
+              )}
               {isAdmin && (
-                <Link to="/admin" className="text-sm text-gray-500 hover:text-black transition-colors">Categories</Link>
+                <Link to="/admin" className="text-sm text-gray-500 hover:text-black transition-colors hidden sm:block">
+                  Categories
+                </Link>
               )}
               {canWrite && (
-                <Link to="/create" className="bg-black text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                <Link to="/create" className="bg-red-600 text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-red-700 transition-colors shadow-sm">
                   + Write Story
                 </Link>
               )}
@@ -42,7 +63,7 @@ function Navbar() {
               </button>
             </>
           ) : (
-            <Link to="/login" className="text-sm text-gray-500 hover:text-black transition-colors">
+            <Link to="/login" className="bg-black text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-gray-800 transition-colors">
               Sign In
             </Link>
           )}
@@ -65,6 +86,7 @@ function ProfileGuard({ children }) {
 export default function App() {
   return (
     <AuthProvider>
+      <Splash />
       <div className="min-h-screen bg-gray-50 font-body">
         <Navbar />
         <ProfileGuard>
