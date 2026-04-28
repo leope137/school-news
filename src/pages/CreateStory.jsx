@@ -21,8 +21,9 @@ export default function CreateStory() {
   });
 
   useEffect(() => {
-    if (user === null || (user !== undefined && !canWrite)) navigate("/");
-  }, [user, isAdmin]);
+    if (user === null) navigate("/login");
+    if (user !== undefined && user !== null && !canWrite) navigate("/");
+  }, [user, canWrite]);
 
   useEffect(() => {
     getCategories().then(setCategories);
@@ -56,7 +57,11 @@ export default function CreateStory() {
     }
   };
 
-  if (user === undefined) return null;
+  if (user === undefined) return (
+    <div className="flex items-center justify-center py-24">
+      <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
